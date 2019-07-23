@@ -61,38 +61,29 @@ let genkeypair bits =
         Some(pk, sk)
     else None
 
-let encrypt pubkey (message : byte []) =
+let encrypt pubkey (message : Math.BigInteger) =
     let r = randomPrime pubkey.Len
-    let m = Math.BigInteger message
+    let m = message
     if pubkey.N.CompareTo(m) < 1 then None
     else
         let gm = pubkey.G.ModPow(m, pubkey.Nsquared)
         let rn = r.ModPow(pubkey.N, pubkey.Nsquared)
-        let prod = gm.Multiply rn
-        let c = prod.Mod pubkey.Nsquared
-        Some(c.ToByteArray())
+        let prod = (gm.Multiply rn).Mod pubkey.Nsquared
+        Some(prod)
 
-let decrypt privatekey (cipher : byte []) =
-    let c = Math.BigInteger cipher
+let decrypt privatekey (cipher : Math.BigInteger) =
+    let c = cipher
     if privatekey.Pubkey.Nsquared.CompareTo c < 1 then None
     else
-        let a = c.ModPow(privatekey.L, privatekey.Pubkey.Nsquared)
-        let l = a.Subtract one
-        let l = l.Divide privatekey.Pubkey.N
-        let m = l.Multiply privatekey.U
-        let m = m.Mod privatekey.Pubkey.N
-        Some(m.ToByteArray())
+        let a = c.ModPow(privatekey.L, privatekey.Pubkey.Nsquared).Subtract one
+        let l = a.Divide privatekey.Pubkey.N
+        let m = (l.Multiply privatekey.U).Mod privatekey.Pubkey.N
+        Some(m)
 
-let add pubkey (msg1 : byte [], msg2 : byte []) =
-    let m1 = Math.BigInteger msg1
-    let m2 = Math.BigInteger msg2
-    let res = (m1.Multiply m2).Mod pubkey.Nsquared
-    res.ToByteArray()
-
-let addConstant pubkey (cipher : byte [], constant : byte []) =
-    let cipher = Math.BigInteger cipher
-    let constant = Math.BigInteger constant
-    let res =
-        (cipher.Multiply(pubkey.G.ModPow(constant, pubkey.Nsquared)))
-            .Mod pubkey.Nsquared
-    res.ToByteArray()
+let add pubkey (cipher1 : Math.BigInteger, cipher2 : Math.BigInteger) =
+    (cipher1.Multiply cipher2).Mod pubkey.Nsquared
+let addConstant pubkey (cipher : Math.BigInteger, constant : Math.BigInteger) =
+    (cipher.Multiply(pubkey.G.ModPow(constant, pubkey.Nsquared)))
+        .Mod pubkey.Nsquared
+let mul pubkey (cipher : Math.BigInteger, constant : Math.BigInteger) =
+    cipher.ModPow(constant, pubkey.Nsquared)
