@@ -3,6 +3,7 @@ open System
 open Paillier
 open Org.BouncyCastle
 
+
 [<EntryPoint>]
 let main argv =
     printfn "Hello World from F#!"
@@ -27,12 +28,20 @@ let main argv =
     let sum = add pub (a,b)
     printfn "%A" (Math.BigInteger sum)
 
+    let sumC = addConstant pub (a,one.ToByteArray ())
+
     let decSum =
         match decrypt priv sum with
         | None -> [| 0uy |]
         | Some(b) -> b
     printfn "%A" (Math.BigInteger decSum)
 
-    printfn "%A" (decSum = (m1.Add m2).ToByteArray() )
+    let decSumC =
+        match decrypt priv sumC with
+        | None -> [| 0uy |]
+        | Some(b) -> b
+    printfn "%A + %A = %A" (m1) one (Math.BigInteger decSumC)
+
+    printfn "decrypted equal to their sum : %A" (decSum = (m1.Add m2).ToByteArray() )
 
     0 // return an integer exit code

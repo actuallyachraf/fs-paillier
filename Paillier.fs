@@ -90,5 +90,13 @@ let add pubkey (msg1:byte[],msg2:byte[]) =
 
     let res = (m1.Multiply m2).Mod pubkey.Nsquared
 
+    res.ToByteArray()
+
+
+let addConstant pubkey (cipher:byte[],constant:byte[]) =
+    let cipher = Math.BigInteger cipher
+    let constant = Math.BigInteger constant
+
+    let res = (cipher.Multiply (pubkey.G.ModPow (constant,pubkey.Nsquared))).Mod pubkey.Nsquared
 
     res.ToByteArray()
