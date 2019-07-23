@@ -66,37 +66,33 @@ let encrypt pubkey (message : byte []) =
     let m = Math.BigInteger message
     if pubkey.N.CompareTo(m) < 1 then None
     else
-        let gm = pubkey.G.ModPow(m, pubkey.Nsquared) in
-        let rn = r.ModPow(pubkey.N, pubkey.Nsquared) in
-        let prod = gm.Multiply rn in
-        let c = prod.Mod pubkey.Nsquared in
+        let gm = pubkey.G.ModPow(m, pubkey.Nsquared)
+        let rn = r.ModPow(pubkey.N, pubkey.Nsquared)
+        let prod = gm.Multiply rn
+        let c = prod.Mod pubkey.Nsquared
         Some(c.ToByteArray())
 
-let decrypt  privatekey  (cipher : byte[]) =
+let decrypt privatekey (cipher : byte []) =
     let c = Math.BigInteger cipher
     if privatekey.Pubkey.Nsquared.CompareTo c < 1 then None
     else
-        let a = c.ModPow(privatekey.L, privatekey.Pubkey.Nsquared) in
-        let l = a.Subtract one in
-        let l = l.Divide privatekey.Pubkey.N in
-        let m = l.Multiply privatekey.U in
-        let m = m.Mod privatekey.Pubkey.N in
+        let a = c.ModPow(privatekey.L, privatekey.Pubkey.Nsquared)
+        let l = a.Subtract one
+        let l = l.Divide privatekey.Pubkey.N
+        let m = l.Multiply privatekey.U
+        let m = m.Mod privatekey.Pubkey.N
         Some(m.ToByteArray())
 
-
-let add pubkey (msg1:byte[],msg2:byte[]) =
+let add pubkey (msg1 : byte [], msg2 : byte []) =
     let m1 = Math.BigInteger msg1
     let m2 = Math.BigInteger msg2
-
     let res = (m1.Multiply m2).Mod pubkey.Nsquared
-
     res.ToByteArray()
 
-
-let addConstant pubkey (cipher:byte[],constant:byte[]) =
+let addConstant pubkey (cipher : byte [], constant : byte []) =
     let cipher = Math.BigInteger cipher
     let constant = Math.BigInteger constant
-
-    let res = (cipher.Multiply (pubkey.G.ModPow (constant,pubkey.Nsquared))).Mod pubkey.Nsquared
-
+    let res =
+        (cipher.Multiply(pubkey.G.ModPow(constant, pubkey.Nsquared)))
+            .Mod pubkey.Nsquared
     res.ToByteArray()
